@@ -19,14 +19,30 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Hero Section */}
+        {/* Hero Section with Video Player */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-xl">
             <div>
-              <div className="text-xs uppercase tracking-wider text-cyan-400 font-bold mb-2">Featured Stream &amp; Token Gateway</div>
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Empowering Independent Artists &amp; Sponsors</h2>
+              <div className="text-xs uppercase tracking-wider text-cyan-400 font-bold mb-2">Featured Decentralized Stream</div>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Live Tokenized Broadcast</h2>
+              
+              {/* Video Player Container */}
+              <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-slate-800 shadow-2xl mb-6">
+                <video 
+                  controls 
+                  autoPlay 
+                  muted 
+                  loop
+                  className="w-full h-full object-cover"
+                  poster="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80"
+                >
+                  <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+
               <p className="text-slate-300 text-sm md:text-base leading-relaxed mb-6">
-                Welcome to the official streaming portal. PoetryOn.TV bridges decentralized video distribution, tokenized rewards on Solana, and premium brand sponsorships for creators worldwide.
+                Streaming live via decentralized Arweave storage with integrated Solana rewards and sponsor gateways.
               </p>
             </div>
             <div className="flex flex-wrap gap-4 pt-4 border-t border-slate-800">
