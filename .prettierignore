@@ -1,0 +1,8 @@
+.next
+node_modules
+target
+Cargo.lock
+pnpm-lock.yaml
+.agents
+agent
+pnpm-workspace.yaml

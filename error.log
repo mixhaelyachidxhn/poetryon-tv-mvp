@@ -1,0 +1,30 @@
+
+[38;5;250m███████╗██╗  ██╗██╗██╗     ██╗     ███████╗[0m
+[38;5;248m██╔════╝██║ ██╔╝██║██║     ██║     ██╔════╝[0m
+[38;5;245m███████╗█████╔╝ ██║██║     ██║     ███████╗[0m
+[38;5;243m╚════██║██╔═██╗ ██║██║     ██║     ╚════██║[0m
+[38;5;240m███████║██║  ██╗██║███████╗███████╗███████║[0m
+[38;5;238m╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚══════╝[0m
+
+┌  [46m[30m skills [39m[49m
+│
+│  [2mTip: use the --yes (-y) and --global (-g) flags to install without prompts.[22m
+[?25l│
+◇  Source: https://github.com/solana-foundation/solana-dev-skill.git
+[?25h[?25l│
+│
+■  [31mFailed to clone repository[39m
+│
+│  [2mFailed to clone https://github.com/solana-foundation/solana-dev-skill.git: Error: spawn git ENOENT[22m
+│
+│  [2m    at ChildProcess._handle.onexit (node:internal/child_process:287:19)[22m
+│
+│  [2m    at onErrorNT (node:internal/child_process:525:16)[22m
+│
+│  [2m    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)[22m
+│
+└  [31mInstallation failed[39m
+
+■  Canceled
+[?25h
+Error: Command failed: npx -y skills add https://github.com/solana-foundation/solana-dev-skill --skill "*" -y
