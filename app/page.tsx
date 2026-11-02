@@ -1,308 +1,131 @@
-"use client";
-import { useEffect, useState } from "react";
-
-type SignerInfo = {
-  backend: string;
-  address?: string;
-  available: boolean;
-  error?: string;
-};
-
-type SignResult = {
-  address?: string;
-  signature?: string;
-  transaction?: string;
-  error?: string;
-};
-
-type DecodedSignedTransaction = {
-  feePayer: string;
-  blockhash: string;
-  memo: string;
-  signature: string;
-  signatureValid: boolean;
-};
-
-type CoSignResult = {
-  decoded?: DecodedSignedTransaction;
-  raw?: string;
-  error?: string;
-};
-
-async function fetchSigners(): Promise<SignerInfo[]> {
-  const body = await (await fetch("/api/signers")).json();
-  return body.signers ?? [];
-}
-
 export default function Home() {
-  const [signers, setSigners] = useState<SignerInfo[] | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
-  const [message, setMessage] = useState("hello solana");
-  const [messageResult, setMessageResult] = useState<SignResult | null>(null);
-  const [memo, setMemo] = useState("hello keychain");
-  const [coSignResult, setCoSignResult] = useState<CoSignResult | null>(null);
-  const [busy, setBusy] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchSigners()
-      .then((list) => {
-        if (cancelled) return;
-        setSigners(list);
-        setSelected((current) => current ?? list[0]?.backend ?? null);
-      })
-      .catch(() => {
-        if (!cancelled) setSigners([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const selectedSigner = signers?.find((s) => s.backend === selected) ?? null;
-
-  async function refreshSigners() {
-    setBusy("signers");
-    try {
-      setSigners(await fetchSigners());
-    } catch {
-      // keep the current list on transient failures
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  async function signMessage() {
-    setBusy("message");
-    try {
-      const res = await fetch("/api/sign/message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, backend: selected }),
-      });
-      setMessageResult(await res.json());
-    } catch (error) {
-      setMessageResult({ error: String(error) });
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  async function coSignTransaction() {
-    if (!selectedSigner?.address) return;
-    setBusy("transaction");
-    try {
-      const res = await fetch("/api/demo/transaction", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ memo, backend: selected }),
-      });
-      const result: (DecodedSignedTransaction & { transaction?: string }) & {
-        error?: string;
-      } = await res.json();
-      if (!res.ok || !result.transaction) {
-        setCoSignResult({ error: result.error ?? "Signing failed" });
-        return;
-      }
-      setCoSignResult({ decoded: result, raw: result.transaction });
-    } catch (error) {
-      setCoSignResult({ error: String(error) });
-    } finally {
-      setBusy(null);
-    }
-  }
-
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-bg1 text-foreground">
-      <main className="relative z-10 mx-auto flex min-h-screen max-w-4xl flex-col gap-10 border-x border-border-low px-6 py-16">
-        <header className="space-y-3">
-          <p className="text-sm uppercase tracking-[0.18em] text-muted">
-            Solana keychain starter
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-            Server-side signing, pluggable key backends
-          </h1>
-          <p className="max-w-3xl text-base leading-relaxed text-muted">
-            Signers live in the Axum (Rust) service powered by{" "}
-            <code className="font-mono">solana-keychain</code> — private keys
-            never reach the browser. The Next.js frontend proxies{" "}
-            <code className="font-mono">/api/*</code> to the Rust service, and
-            every backend configured in your environment appears in the registry
-            below. See <code className="font-mono">.env.example</code> for every
-            backend&apos;s variables.
-          </p>
-        </header>
+    <main className="min-h-screen bg-slate-950 text-white p-6 md:p-12 font-sans">
+      <div className="max-w-6xl mx-auto space-y-10">
+        
+        {/* Header / Brand */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-6 gap-4">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-cyan-400">POETRYON.TV</h1>
+            <p className="text-sm text-slate-400 mt-1">Decentralized Streaming &amp; Sponsorship Network on Solana &amp; Arweave</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="px-3 py-1 bg-emerald-950 text-emerald-400 border border-emerald-800 rounded-full text-xs font-semibold">
+              Live MVP Active
+            </span>
+            <span className="px-3 py-1 bg-cyan-950 text-cyan-300 border border-cyan-800 rounded-full text-xs font-semibold">
+              watch.poetryon.tv
+            </span>
+          </div>
+        </div>
 
-        <section className="w-full max-w-3xl space-y-4 rounded-2xl border border-border-low bg-card p-6 shadow-[0_20px_80px_-50px_rgba(0,0,0,0.35)]">
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-1">
-              <p className="text-lg font-semibold">Signers</p>
-              <p className="text-sm text-muted">
-                Served by <code className="font-mono">GET /api/signers</code> —
-                one entry per configured backend, checked with{" "}
-                <code className="font-mono">isAvailable()</code>. Pick the one
-                to sign with.
+        {/* Hero Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-xl">
+            <div>
+              <div className="text-xs uppercase tracking-wider text-cyan-400 font-bold mb-2">Featured Stream &amp; Token Gateway</div>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Empowering Independent Artists &amp; Sponsors</h2>
+              <p className="text-slate-300 text-sm md:text-base leading-relaxed mb-6">
+                Welcome to the official streaming portal. PoetryOn.TV bridges decentralized video distribution, tokenized rewards on Solana, and premium brand sponsorships for creators worldwide.
               </p>
             </div>
-            <button
-              onClick={() => void refreshSigners()}
-              disabled={busy !== null}
-              className="inline-flex items-center gap-2 rounded-lg border border-border-low bg-card px-3 py-2 text-sm font-medium transition hover:-translate-y-0.5 hover:shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              Refresh
-            </button>
-          </div>
-          <div className="space-y-2">
-            {signers === null && <p className="text-sm text-muted">Loading…</p>}
-            {signers?.map((signer) => (
-              <label
-                key={signer.backend}
-                className="flex cursor-pointer flex-wrap items-center gap-3 rounded-lg border border-border-low bg-cream px-3 py-2 text-sm has-checked:border-foreground/40"
-              >
-                <input
-                  type="radio"
-                  name="signer"
-                  checked={selected === signer.backend}
-                  onChange={() => setSelected(signer.backend)}
-                  className="accent-foreground"
-                />
-                <span className="font-semibold">{signer.backend}</span>
-                <span className="break-all font-mono text-xs text-muted">
-                  {signer.address ?? signer.error ?? "—"}
-                </span>
-                <span className="ml-auto rounded-full bg-card px-2 py-0.5 text-xs font-semibold uppercase tracking-wide">
-                  {signer.available ? "available" : "unavailable"}
-                </span>
-              </label>
-            ))}
-          </div>
-          <p className="text-xs text-muted">
-            Only <code className="font-mono">memory</code>? Add credentials for
-            any backend in <code className="font-mono">.env.local</code> and it
-            shows up here — no code changes.
-          </p>
-        </section>
-
-        <section className="w-full max-w-3xl space-y-4 rounded-2xl border border-border-low bg-card p-6 shadow-[0_20px_80px_-50px_rgba(0,0,0,0.35)]">
-          <div className="space-y-1">
-            <p className="text-lg font-semibold">Sign a message</p>
-            <p className="text-sm text-muted">
-              Posts to <code className="font-mono">POST /api/sign/message</code>{" "}
-              with the selected backend and returns a base58 Ed25519 signature.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <input
-              value={message}
-              onChange={(event) => setMessage(event.target.value)}
-              placeholder="Message to sign"
-              className="min-w-0 flex-1 rounded-lg border border-border-low bg-cream px-3 py-2 font-mono text-sm outline-none"
-            />
-            <button
-              onClick={() => void signMessage()}
-              disabled={busy !== null || message.length === 0 || !selected}
-              className="inline-flex items-center gap-2 rounded-lg border border-border-low bg-card px-3 py-2 text-sm font-medium transition hover:-translate-y-0.5 hover:shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {busy === "message" ? "Signing…" : `Sign with ${selected ?? "…"}`}
-            </button>
-          </div>
-          {messageResult && (
-            <p className="break-all rounded-lg border border-border-low bg-cream px-3 py-2 font-mono text-xs">
-              {messageResult.signature ?? messageResult.error}
-            </p>
-          )}
-        </section>
-
-        <section className="w-full max-w-3xl space-y-4 rounded-2xl border border-border-low bg-card p-6 shadow-[0_20px_80px_-50px_rgba(0,0,0,0.35)]">
-          <div className="space-y-1">
-            <p className="text-lg font-semibold">Co-sign a transaction</p>
-            <p className="text-sm text-muted">
-              The Rust service builds a memo transaction (placeholder
-              blockhash), signs it with the selected backend via{" "}
-              <code className="font-mono">POST /api/demo/transaction</code>,
-              then decodes the result and verifies the signature server-side.
-              Nothing is submitted to the network.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <input
-              value={memo}
-              onChange={(event) => setMemo(event.target.value)}
-              placeholder="Memo for the demo transaction"
-              className="min-w-0 flex-1 rounded-lg border border-border-low bg-cream px-3 py-2 font-mono text-sm outline-none"
-            />
-            <button
-              onClick={() => void coSignTransaction()}
-              disabled={
-                busy !== null || memo.length === 0 || !selectedSigner?.address
-              }
-              className="inline-flex items-center gap-2 rounded-lg border border-border-low bg-card px-3 py-2 text-sm font-medium transition hover:-translate-y-0.5 hover:shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {busy === "transaction" ? "Signing…" : "Build & co-sign"}
-            </button>
-          </div>
-          {coSignResult?.error && (
-            <p className="break-all rounded-lg border border-border-low bg-cream px-3 py-2 font-mono text-xs">
-              {coSignResult.error}
-            </p>
-          )}
-          {coSignResult?.decoded && (
-            <div className="space-y-2">
-              <dl className="grid gap-2 rounded-lg border border-border-low bg-cream px-3 py-2 text-xs sm:grid-cols-[8rem_1fr]">
-                <dt className="font-semibold">Fee payer</dt>
-                <dd className="break-all font-mono">
-                  {coSignResult.decoded.feePayer}
-                </dd>
-                <dt className="font-semibold">Blockhash</dt>
-                <dd className="break-all font-mono">
-                  {coSignResult.decoded.blockhash}
-                </dd>
-                <dt className="font-semibold">Memo</dt>
-                <dd className="break-all font-mono">
-                  {coSignResult.decoded.memo}
-                </dd>
-                <dt className="font-semibold">Signature</dt>
-                <dd className="break-all font-mono">
-                  {coSignResult.decoded.signature}{" "}
-                  <span
-                    className={
-                      coSignResult.decoded.signatureValid
-                        ? "font-sans font-semibold text-green-600"
-                        : "font-sans font-semibold text-red-600"
-                    }
-                  >
-                    {coSignResult.decoded.signatureValid
-                      ? "✓ valid"
-                      : "✗ invalid"}
-                  </span>
-                </dd>
-              </dl>
-              {coSignResult.raw && (
-                <details className="rounded-lg border border-border-low bg-cream px-3 py-2 text-xs">
-                  <summary className="cursor-pointer font-semibold">
-                    Raw signed transaction (base64)
-                  </summary>
-                  <p className="mt-2 break-all font-mono">{coSignResult.raw}</p>
-                </details>
-              )}
+            <div className="flex flex-wrap gap-4 pt-4 border-t border-slate-800">
+              <a href="#sponsors" className="px-5 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold rounded-lg text-sm transition">
+                Sponsorship Tiers
+              </a>
+              <a href="#metrics" className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-lg text-sm transition">
+                Network Stats
+              </a>
             </div>
-          )}
-        </section>
+          </div>
 
-        <footer className="text-sm text-muted">
-          Built on{" "}
-          <a
-            className="font-medium underline underline-offset-2"
-            href="https://github.com/solana-foundation/solana-keychain"
-            target="_blank"
-            rel="noreferrer"
-          >
-            @solana/keychain
-          </a>{" "}
-          — the same signers plug into any{" "}
-          <code className="font-mono">@solana/kit</code> transaction pipeline.
-        </footer>
-      </main>
-    </div>
+          {/* Quick Metrics Card */}
+          <div id="metrics" className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between shadow-xl">
+            <div>
+              <h3 className="text-lg font-bold text-white mb-4">Network Overview</h3>
+              <ul className="space-y-4 text-sm">
+                <li className="flex justify-between items-center border-b border-slate-800 pb-3">
+                  <span className="text-slate-400">Blockchain</span>
+                  <span className="font-semibold text-cyan-400">Solana &amp; Arweave</span>
+                </li>
+                <li className="flex justify-between items-center border-b border-slate-800 pb-3">
+                  <span className="text-slate-400">Network Reach</span>
+                  <span className="font-semibold text-emerald-400">390M+ Database</span>
+                </li>
+                <li className="flex justify-between items-center pb-1">
+                  <span className="text-slate-400">Revenue Split</span>
+                  <span className="font-semibold text-white">50/50 Creator Model</span>
+                </li>
+              </ul>
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-800 text-xs text-slate-400 text-center">
+              Managed via Swift Walker Organization Limited
+            </div>
+          </div>
+        </div>
+
+        {/* Sponsorship Packages Section */}
+        <div id="sponsors" className="space-y-6">
+          <div className="text-center max-w-2xl mx-auto">
+            <h3 className="text-2xl font-bold text-white">Sponsorship &amp; SMS Pricing Tiers</h3>
+            <p className="text-slate-400 text-sm mt-2">High-visibility promotional packages designed for enterprise partners and dispensaries.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
+              <div>
+                <div className="text-xs font-bold text-cyan-400 uppercase">Starter Tier</div>
+                <div className="text-3xl font-extrabold text-white mt-2 mb-4">,500</div>
+                <p className="text-slate-400 text-sm mb-6">Targeted outreach package across initial subscriber networks.</p>
+                <ul className="space-y-3 text-sm text-slate-300">
+                  <li className="flex items-center gap-2">? 8,000 Verified Contacts</li>
+                  <li className="flex items-center gap-2">? Standard Placement</li>
+                  <li className="flex items-center gap-2">? Analytics Report</li>
+                </ul>
+              </div>
+              <button className="mt-8 w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-semibold rounded-lg text-sm transition">
+                Select Package
+              </button>
+            </div>
+
+            <div className="bg-gradient-to-b from-slate-900 to-slate-900 border-2 border-cyan-500 rounded-2xl p-6 flex flex-col justify-between shadow-2xl relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-cyan-500 text-slate-950 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                Most Popular
+              </div>
+              <div>
+                <div className="text-xs font-bold text-cyan-400 uppercase">Growth Tier</div>
+                <div className="text-3xl font-extrabold text-white mt-2 mb-4">Custom</div>
+                <p className="text-slate-400 text-sm mb-6">Scaled campaign integration for regional market leaders.</p>
+                <ul className="space-y-3 text-sm text-slate-300">
+                  <li className="flex items-center gap-2">? Expanded SMS Broadcasts</li>
+                  <li className="flex items-center gap-2">? Premium Video Placement</li>
+                  <li className="flex items-center gap-2">? Dedicated Account Manager</li>
+                </ul>
+              </div>
+              <button className="mt-8 w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold rounded-lg text-sm transition">
+                Get Started
+              </button>
+            </div>
+
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
+              <div>
+                <div className="text-xs font-bold text-cyan-400 uppercase">Enterprise Tier</div>
+                <div className="text-3xl font-extrabold text-white mt-2 mb-4"></div>
+                <p className="text-slate-400 text-sm mb-6">Full nationwide push across the 4 million network database.</p>
+                <ul className="space-y-3 text-sm text-slate-300">
+                  <li className="flex items-center gap-2">? 4 Million Contact Reach</li>
+                  <li className="flex items-center gap-2">? Exclusive Sponsorship Slot</li>
+                  <li className="flex items-center gap-2">? VIP Token Allocation</li>
+                </ul>
+              </div>
+              <button className="mt-8 w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 font-semibold rounded-lg text-sm transition">
+                Contact Sales
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
   );
 }
